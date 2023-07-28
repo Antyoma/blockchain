@@ -1,4 +1,5 @@
-const SHA256 = require('crypto-js/sha256')
+const SHA256 = require('crypto-js/sha256');
+const hex2ascii = require("hex2ascii");
 
 class Block {
     constructor(data) {
@@ -15,7 +16,39 @@ class Block {
             let currentHash = self.hash;
 
             self.hash = SHA256(JSON.stringify ({ ...self, hash: null})).toString();
+
+            if (currentHash !== self.hash){
+                return resolve(false);
+            }
+
+            resolve(true)
         });
+    }
+
+    getBlockData() {
+        const self = this;
+        return new Promise((resolve, reject) => {
+            let encodedData = self.body;
+            let decodedData = hex2ascii(encodedData);
+            let dataObject = JSON.parse(decodedData);
+
+            if (dataObject === 'Genesis Block') {
+                reject(new Error('Este es el Genesis Block'));
+            }
+
+            resolve(dataObject);
+        });
+    }
+
+    toString() {
+        const { hash, heightm, body, time, previousBlockHash } = this;
+        return `Block -
+        hash: ${hash}
+        height: ${height}
+        body: ${body}
+        time: ${time}
+        previousBlockHash: ${previousBlockHash}
+        ------------------------------------- `;
     }
 }
 
